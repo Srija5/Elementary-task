@@ -1,0 +1,60 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
+
+# Step 1: Load the dataset
+df = pd.read_csv('dataset.csv')
+
+# Step 2: Handle missing values
+# Identify missing values
+missing_values = df.isnull().sum()
+print("Missing values:\n", missing_values)
+
+# Impute missing values (example using SimpleImputer with mean strategy)
+imputer = SimpleImputer(strategy='mean')
+df[['NumericColumn1', 'NumericColumn2']] = imputer.fit_transform(df[['NumericColumn1', 'NumericColumn2']])
+
+# Step 3: Handle outliers (example using IQR method)
+Q1 = df['NumericColumn1'].quantile(0.25)
+Q3 = df['NumericColumn1'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+df = df[(df['NumericColumn1'] >= lower_bound) & (df['NumericColumn1'] <= upper_bound)]
+
+# Step 4: Handle inconsistencies (example standardizing date format)
+df['DateColumn'] = pd.to_datetime(df['DateColumn'], format='%Y-%m-%d')
+
+# Step 5: Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# Step 6: Feature engineering (example creating new feature)
+df['Age'] = 2024 - df['BirthYear']
+
+# Step 7: Transformation techniques (example using MinMaxScaler)
+scaler = MinMaxScaler()
+df[['NumericColumn1', 'NumericColumn2']] = scaler.fit_transform(df[['NumericColumn1', 'NumericColumn2']])
+
+# Step 8: Statistical methods and visualization
+# Explore data distributions
+sns.histplot(df['NumericColumn1'], kde=True)
+plt.title('Distribution of NumericColumn1')
+plt.show()
+
+# Analyze relationships
+sns.scatterplot(x='NumericColumn1', y='NumericColumn2', data=df)
+plt.title('Relationship between NumericColumn1 and NumericColumn2')
+plt.show()
+
+# Step 9: Ensure data quality and integrity
+# Perform any additional checks or validations as needed
+
+# Step 10: Document procedures and decisions
+# Document the steps in a README file or a separate documentation file
+
+# Example: Save cleaned data to a new CSV file
+df.to_csv('cleaned_dataset.csv', index=False)
